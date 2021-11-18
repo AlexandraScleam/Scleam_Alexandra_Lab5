@@ -28,7 +28,7 @@ namespace Scleam_Alexandra_Lab5
         AutoGeistEntitiesModel ctx = new AutoGeistEntitiesModel();
         CollectionViewSource carViewSource;
         CollectionViewSource customerViewSource;
-        CollectionViewSource carOrdersViewSource;
+        CollectionViewSource customerOrdersViewSource;
 
         Binding bodyStyleTextBoxBinding = new Binding();
         Binding modelTextBoxBinding = new Binding();
@@ -58,24 +58,16 @@ namespace Scleam_Alexandra_Lab5
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
 
-            System.Windows.Data.CollectionViewSource carViewSource = ((System.Windows.Data.CollectionViewSource)(this.FindResource("carViewSource")));
-            // Load data by setting the CollectionViewSource.Source property:
-            // carViewSource.Source = [generic data source]
-            System.Windows.Data.CollectionViewSource customerViewSource = ((System.Windows.Data.CollectionViewSource)(this.FindResource("customerViewSource")));
-            // Load data by setting the CollectionViewSource.Source property:
-            // customerViewSource.Source = [generic data source]
-            carViewSource =
-            ((System.Windows.Data.CollectionViewSource)(this.FindResource("carViewSource")));
+            carViewSource = ((System.Windows.Data.CollectionViewSource)(this.FindResource("carViewSource")));
             carViewSource.Source = ctx.Cars.Local;
             ctx.Cars.Load();
 
-            carViewSource =
-            ((System.Windows.Data.CollectionViewSource)(this.FindResource("customerViewSource")));
+            customerViewSource = ((System.Windows.Data.CollectionViewSource)(this.FindResource("customerViewSource")));
             customerViewSource.Source = ctx.Customers.Local;
             ctx.Customers.Load();
 
-            carOrdersViewSource = ((System.Windows.Data.CollectionViewSource)(this.FindResource("carOrdersViewSource")));
-            //carOrdersViewSource.Source = ctx.Orders.Local; 
+            customerOrdersViewSource = ((System.Windows.Data.CollectionViewSource)(this.FindResource("customerOrdersViewSource")));
+            //customerOrdersViewSource.Source = ctx.Orders.Local; 
             ctx.Orders.Load();
             BindDataGrid();
             cbCars.ItemsSource = ctx.Cars.Local; 
@@ -108,6 +100,7 @@ namespace Scleam_Alexandra_Lab5
                     firstNameTextBox.Text = "";
                     lastNameTextBox.Text = "";
                     Keyboard.Focus(firstNameTextBox);
+                    SetValidationBinding();
                     break;
                 case "Orders":
                     break;
@@ -117,6 +110,7 @@ namespace Scleam_Alexandra_Lab5
         private void btnEdit_Click(object sender, RoutedEventArgs e)
         {
             action = ActionState.Edit;
+            SetValidationBinding();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -374,7 +368,7 @@ namespace Scleam_Alexandra_Lab5
                 }
                 BindDataGrid();
                 // pozitionarea pe item-ul curent
-                carOrdersViewSource.View.MoveCurrentTo(selectedOrder);
+                customerOrdersViewSource.View.MoveCurrentTo(selectedOrder);
             }
             else if (action == ActionState.Delete)
             {
@@ -413,9 +407,57 @@ namespace Scleam_Alexandra_Lab5
                                  car.Make,
                                  car.Model
                              };
-            carOrdersViewSource.Source = queryOrder.ToList();
+            customerOrdersViewSource.Source = queryOrder.ToList();
         }
 
+        private void SetValidationBinding()
+        {
+            Binding firstNameValidationBinding = new Binding();
+            firstNameValidationBinding.Source = customerViewSource;
+            firstNameValidationBinding.Path = new PropertyPath("FirstName");
+            firstNameValidationBinding.NotifyOnValidationError = true;
+            firstNameValidationBinding.Mode = BindingMode.TwoWay;
+            firstNameValidationBinding.UpdateSourceTrigger =
+           UpdateSourceTrigger.PropertyChanged;
+            //string required
+            firstNameValidationBinding.ValidationRules.Add(new StringNotEmpty());
+            firstNameTextBox.SetBinding(TextBox.TextProperty, firstNameValidationBinding);
+
+            Binding lastNameValidationBinding = new Binding();
+            lastNameValidationBinding.Source = customerViewSource;
+            lastNameValidationBinding.Path = new PropertyPath("LastName");
+            lastNameValidationBinding.NotifyOnValidationError = true;
+            lastNameValidationBinding.Mode = BindingMode.TwoWay;
+            lastNameValidationBinding.UpdateSourceTrigger =
+           UpdateSourceTrigger.PropertyChanged;
+            //string min length validator
+            lastNameValidationBinding.ValidationRules.Add(new StringMinLength());
+            lastNameTextBox.SetBinding(TextBox.TextProperty, lastNameValidationBinding); //setare binding nou
+
+
+            Binding makeNameValidationBinding = new Binding();
+            makeNameValidationBinding.Source = carViewSource;
+            makeNameValidationBinding.Path = new PropertyPath("MakeName");
+            makeNameValidationBinding.NotifyOnValidationError = true;
+            makeNameValidationBinding.Mode = BindingMode.TwoWay;
+            makeNameValidationBinding.UpdateSourceTrigger =
+           UpdateSourceTrigger.PropertyChanged;
+            //string required
+            makeNameValidationBinding.ValidationRules.Add(new StringNotEmpty());
+            makeTextBox.SetBinding(TextBox.TextProperty, makeNameValidationBinding);
+
+
+            Binding modelNameValidationBinding = new Binding();
+            modelNameValidationBinding.Source = carViewSource;
+            modelNameValidationBinding.Path = new PropertyPath("ModelName");
+            modelNameValidationBinding.NotifyOnValidationError = true;
+            modelNameValidationBinding.Mode = BindingMode.TwoWay;
+            modelNameValidationBinding.UpdateSourceTrigger =
+           UpdateSourceTrigger.PropertyChanged;
+            //string required
+            modelNameValidationBinding.ValidationRules.Add(new StringNotEmpty());
+            modelTextBox.SetBinding(TextBox.TextProperty, modelNameValidationBinding);
+        }
 
     }
 }
